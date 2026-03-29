@@ -253,7 +253,7 @@
   }
 
   :global(.custom-marker-container) {
-    pointer-events: none;
+    /* pointer-events: none; removed to allow clicking markers */
   }
   
   :global(.marker-pin) {

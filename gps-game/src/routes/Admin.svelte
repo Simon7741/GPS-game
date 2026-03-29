@@ -313,6 +313,10 @@
 
   async function savePoint() {
     if (!selectedPoint) return;
+    if (selectedPoint.id.startsWith('temp_')) {
+        error = "Please wait for point to be saved to database first.";
+        return;
+    }
     try {
       const formData = new FormData();
       formData.append('name', pointNameInput);
@@ -330,6 +334,8 @@
       const record = await pb.collection('points').update(selectedPoint.id, formData);
       gamePoints = gamePoints.map(p => p.id === selectedPoint!.id ? record : p);
       selectedPoint = null; 
+      successMsg = 'Point saved!';
+      setTimeout(() => successMsg = '', 1500);
     } catch (e: any) { error = "Save failed: " + e.message; }
   }
 
@@ -346,6 +352,8 @@
   async function updatePointPosition(point: Point, lat: number, lng: number) {
     gamePoints = gamePoints.map(p => p.id === point.id ? { ...p, latitude: lat, longitude: lng } : p);
     calculateDistances();
+    // Only update in DB if it's not a temporary ID
+    if (point.id.startsWith('temp_')) return;
     try {
       await pb.collection('points').update(point.id, { latitude: lat, longitude: lng });
     } catch (e: any) { error = "Failed to update position: " + e.message; }
@@ -365,7 +373,11 @@
     gamePoints = newPoints;
     draggedItemIndex = null;
     calculateDistances();
-    try { await Promise.all(gamePoints.map(p => pb.collection('points').update(p.id, { order: p.order }))); } catch (e: any) { error = "Failed to reorder points: " + e.message; }
+    try { 
+      // Only update points that are already in the DB
+      const persistentPoints = gamePoints.filter(p => !p.id.startsWith('temp_'));
+      await Promise.all(persistentPoints.map(p => pb.collection('points').update(p.id, { order: p.order }))); 
+    } catch (e: any) { error = "Failed to reorder points: " + e.message; }
   }
 
   // --- Distances ---
