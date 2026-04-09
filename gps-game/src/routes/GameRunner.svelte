@@ -32,6 +32,7 @@
   
   let userCode = $state('');
   let codeError = $state('');
+  let isCreator = $state(pb.authStore.isValid);
 
   // Computed
   let currentTarget = $derived(points[currentPointIndex]);
@@ -189,7 +190,9 @@
       <p>You have visited all locations.</p>
       <div class="trophy">🏆</div>
       <button onclick={onExit}>Return to Base</button>
-      <button class="debug-btn" onclick={restartGame} style="margin-top: 2rem; border-color: #666;">Restart Game (Debug)</button>
+      {#if isCreator}
+        <button class="debug-btn" onclick={restartGame} style="margin-top: 2rem; border-color: #666;">Restart Game (Debug)</button>
+      {/if}
     </div>
   {:else}
     <!-- FIXED TOP BAR -->
@@ -273,10 +276,12 @@
                 {/if}
                 
                 {#if !hasGPS} <p class="warning">📡 Waiting for GPS signal...</p> {/if}
-                <div class="debug-actions">
-                    <button class="debug-btn" onclick={skipPoint}>Skip Point</button>
-                    <button class="debug-btn" onclick={restartGame}>Restart Game</button>
-                </div>
+                {#if isCreator}
+                  <div class="debug-actions">
+                      <button class="debug-btn" onclick={skipPoint}>Skip Point</button>
+                      <button class="debug-btn" onclick={restartGame}>Restart Game</button>
+                  </div>
+                {/if}
             </div>
         </div>
       {:else}
@@ -343,10 +348,12 @@
                       </div>
                   {/if}
 
-                  <div class="debug-actions">
-                      <button class="debug-btn" onclick={skipPoint}>Skip Point</button>
-                      <button class="debug-btn" onclick={restartGame}>Restart Game</button>
-                  </div>
+                  {#if isCreator}
+                    <div class="debug-actions">
+                        <button class="debug-btn" onclick={skipPoint}>Skip Point</button>
+                        <button class="debug-btn" onclick={restartGame}>Restart Game</button>
+                    </div>
+                  {/if}
               </div>
           {/if}
         </div>
